@@ -7,6 +7,7 @@ const {
   createChapter,
   updateChapter,
   deleteChapter,
+  generateQuickNotes,
 } = require('../controllers/chapter.controller');
 const { protect } = require('../middleware/auth');
 
@@ -44,5 +45,7 @@ router.route('/:id')
   .get(getChapterById)
   .put(updateChapter)
   .delete(deleteChapter);
+
+router.post('/:id/quick-notes', generateQuickNotes);
 
 module.exports = router;

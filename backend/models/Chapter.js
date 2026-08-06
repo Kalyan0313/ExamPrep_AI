@@ -32,6 +32,19 @@ const chapterSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please add chapter content'],
     },
+    quickNotes: {
+      type: [
+        {
+          en: { type: String, required: true },
+          bn: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
+    quickNotesGeneratedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
