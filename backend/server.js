@@ -7,14 +7,15 @@ dotenv.config();
 
 const app = express();
 
-// Configurable CORS options for local dev & production deployments
-const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(',').map((url) => url.trim())
-  : '*';
-
+// Bulletproof CORS policy for development & production deployments
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow server-to-server or non-browser tools (e.g. Postman, mobile)
+      if (!origin) return callback(null, true);
+      // Reflect origin dynamically to ensure zero CORS errors across Vercel / Netlify preview links
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

@@ -1,6 +1,7 @@
 export function getApiBaseUrl(): string {
   let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  url = url.trim().replace(/\/+$/, '');
+  // Strip quotes, whitespace, and trailing slashes
+  url = url.trim().replace(/^["']|["']$/g, '').trim().replace(/\/+$/, '');
   if (!url.endsWith('/api')) {
     url = `${url}/api`;
   }
