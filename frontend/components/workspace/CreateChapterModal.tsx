@@ -121,7 +121,7 @@ export const CreateChapterModal: React.FC<CreateChapterModalProps> = ({ isOpen, 
               >
                 {folders.map((f) => (
                   <option key={f._id} value={f._id}>
-                    {f.icon || '📁'} {f.name}
+                    {f.name}
                   </option>
                 ))}
               </select>
