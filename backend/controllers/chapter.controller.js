@@ -178,13 +178,13 @@ const generateQuickNotes = async (req, res) => {
 
     const prompt = `You are an expert educator preparing quick-revision one-liner notes for Indian competitive exam students.
 
-From the following chapter content, extract the most important facts, definitions, dates, names, and key points.
-Generate exactly 15 one-liner notes suitable for last-minute revision.
+From the following chapter content, carefully extract all the important, need-to-know facts, definitions, dates, names, events, and key points that are critical for competitive exams. Do not skip any key pieces of information.
+Dynamically generate as many revision notes as needed to cover all the important points in the document.
 
 STRICT RULES:
 - Each note must be a single crisp sentence (max 25 words).
-- Must be factual and directly testable in exams (SSC, UPSC, Railways, Banking).
-- Cover diverse sub-topics within the chapter — do not cluster on one concept.
+- Must be factual, high-yield, and directly testable in exams (SSC, UPSC, Railways, Banking).
+- Cover all key sub-topics within the chapter content.
 - Do NOT say "The text states" or reference the chapter/passage. State facts directly.
 - The "bn" field must be the COMPLETE Bengali translation of "en", written in Bengali script (বাংলা). Not transliteration.
 
@@ -193,10 +193,10 @@ Subject: ${chapter.subject}
 
 Content:
 """
-${chapter.content.substring(0, 12000)}
+${chapter.content.substring(0, 15000)}
 """
 
-Return a valid JSON object with key "notes" containing an array of exactly 15 objects, each with:
+Return a valid JSON object with key "notes" containing an array of objects, each with:
 - en (string: the one-liner fact in English)
 - bn (string: the same fact translated into Bengali script)`;
 
