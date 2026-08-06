@@ -1,219 +1,163 @@
-# ExamPrep AI 🎓🤖
+# ExamPrep AI
 
-> An Enterprise-Grade, AI-Powered Adaptive Quiz & Exam Preparation Engine designed for Government & Competitive Exam Preparation.
+A full-stack exam prep tool I built because I was tired of reading the same notes passively. The idea is simple — you paste your study material, and the AI generates fresh MCQs from it every time. No repeated questions, no memorizing answers. Just actual practice.
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express-green?style=flat-square&logo=nodedotjs)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
-[![Gemini AI](https://img.shields.io/badge/AI-Google_Gemini-8E75B2?style=flat-square&logo=googlegemini)](https://ai.google.dev/)
-[![License](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square)](LICENSE)
+Built for UPSC, SSC, Railways, and similar Government exam aspirants who need to do more than just highlight text.
 
 ---
 
-## 🌟 Overview
+## What it actually does
 
-**ExamPrep AI** revolutionizes competitive exam preparation by transforming raw study materials (plain text, PDF documents, DOCX notes) into structured, dynamic, and non-repetitive multiple-choice quizzes (MCQs). Powered by Google Gemini AI, the platform leverages active recall, spaced repetition, and adaptive difficulty scaling to eliminate passive reading and maximize retention.
+You upload a chapter — either typed out or as a PDF/DOCX — and from that you can:
 
----
+- Generate a quiz of 5 to 50 questions at any difficulty
+- Submit answers and get scored with per-question explanations
+- Retry only the questions you got wrong, with *reframed* questions on the same concept (not the same question again)
+- Bookmark questions you want to revisit later
+- Track your accuracy trends, streaks, and weak topics across subjects
 
-## ✨ Key Features
-
-### 📁 Workspace & Material Management
-- **Hierarchical Subject Folders**: Organize study notes by subject, topic, or exam module.
-- **Multi-Format Ingestion**: Upload study materials directly via raw text input, `.pdf` parsing, or `.docx` document processing (via `mammoth` & `pdf-parse`).
-
-### 🤖 Adaptive AI Quiz Generation
-- **Dynamic MCQ Engine**: Generates unique context-aware questions with plausible distractors, detailed explanations, and specific syllabus context.
-- **Strict Schema Enforcement**: Ensures zero hallucinated response formats using Zod schema validation and structured JSON payloads.
-- **Configurable Difficulty & Question Count**: Tailor quiz sessions from fast 5-question drills to comprehensive 50-question mock exams.
-
-### 🔄 Smart Retry & Revision System
-- **Mistake Targeting Engine**: Automatically isolates incorrect and unattempted questions into targeted retry sessions.
-- **Spaced Repetition Loop**: Track mastery progress over repeated attempts until 100% accuracy is achieved on weak topics.
-
-### 🔖 Bookmarks & Performance Analytics
-- **Smart Bookmarking**: Save tricky questions for quick reference and focused review sessions.
-- **Visual Performance Dashboard**: High-level metrics tracking accuracy percentage, total quizzes completed, weak areas, and score progression over time.
+The workspace is organized like a file tree — folders for each subject, chapters inside them. It feels closer to Obsidian than a typical quiz app.
 
 ---
 
-## 🏗️ System Architecture
+## Tech stack
 
-```
-                       ┌─────────────────────────┐
-                       │   ExamPrep AI Client    │
-                       │ Next.js 14 / Zustand    │
-                       └────────────┬────────────┘
-                                    │ REST API (JSON / Multipart)
-                                    ▼
-                       ┌─────────────────────────┐
-                       │   Express API Server    │
-                       │ Middleware / JWT / Zod │
-                       └─────┬──────────────┬────┘
-                             │              │
-        ┌────────────────────┴┐            ┌┴────────────────────┐
-        │   MongoDB Database  │            │  Google Gemini AI   │
-        │ Mongoose Schemas    │            │ Generative AI API   │
-        └─────────────────────┘            └─────────────────────┘
-```
+**Frontend** — Next.js 14 (App Router), TypeScript, Zustand, TanStack Query, Tailwind CSS
+
+**Backend** — Node.js, Express, MongoDB with Mongoose, JWT auth, Multer for file uploads
+
+**Document parsing** — `pdf-parse` for PDFs, `mammoth` for DOCX files
+
+**AI** — Google Gemini 2.5 Flash Lite as the primary model. OpenRouter (Qwen, DeepSeek, Llama) as a fallback if the Gemini quota runs dry.
 
 ---
 
-## 🛠️ Technology Stack
+## Running it locally
 
-### Frontend
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) & [TanStack React Query](https://tanstack.com/query)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with Obsidian dark theme design system
-- **Icons**: [Lucide React](https://lucide.dev/)
+You'll need Node 18+, MongoDB running locally or an Atlas URI, and a Gemini API key from Google AI Studio.
 
-### Backend
-- **Runtime**: [Node.js](https://nodejs.org/) & [Express.js](https://expressjs.com/)
-- **Database**: [MongoDB](https://www.mongodb.com/) via [Mongoose ODM](https://mongoosejs.com/)
-- **Authentication**: JWT (JSON Web Tokens) with `bcryptjs` password hashing
-- **File Ingestion**: `multer`, `pdf-parse`, `mammoth` (DOCX parsing)
-- **Validation**: [Zod](https://zod.dev/)
+### Clone and set up
 
-### AI & Prompt Engineering
-- **Model**: Google Gemini 2.5 Flash Lite (`@google/generative-ai`)
-- **Strategy**: System prompt isolation, JSON schema constraint enforcement, distractor plausibility tuning
-
----
-
-## 📂 Repository Structure
-
-```
-ExamPrep_AI/
-├── frontend/                   # Next.js 14 Client Application
-│   ├── components/             # Reusable UI & Workspace Components
-│   │   ├── ui/                 # Core UI Primitives (Modals, Buttons, Badges)
-│   │   └── workspace/          # Folder, Chapter & Quiz Components
-│   ├── store/                  # Zustand Store Modules (folderStore, chapterStore)
-│   ├── services/               # API Client Service Abstractions
-│   ├── app/                    # Next.js App Router Pages
-│   └── public/                 # Static Assets
-│
-├── backend/                    # Express.js REST API Server
-│   ├── controllers/            # Business Logic & Request Handlers
-│   ├── models/                 # Mongoose Database Schemas
-│   ├── routes/                 # Express Route Definitions
-│   ├── middleware/             # Auth JWT & Multer File Upload Middlewares
-│   ├── services/               # Gemini AI Generation Services
-│   └── utils/                  # Document Parsers & Helper Functions
-│
-├── project-docs/               # Technical Documentation Suite
-│   ├── 01-PRD.md               # Product Requirements
-│   ├── 02-SRS.md               # Software Requirements Specification
-│   ├── 03-Database.md          # Database Schema Specification
-│   ├── 04-API.md               # REST API Endpoint Documentation
-│   └── ...                     # System Prompts, Roadmap & Specs
-│
-└── README.md                   # System Overview & Quick Start Guide
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Node.js**: `v18.x` or higher
-- **npm** or **yarn**
-- **MongoDB**: Local MongoDB instance (`mongodb://localhost:27017`) or MongoDB Atlas connection string
-- **Google Gemini API Key**: Obtain from [Google AI Studio](https://aistudio.google.com/)
-
----
-
-### 1. Repository Setup
 ```bash
-git clone https://github.com/your-username/ExamPrep_AI.git
+git clone https://github.com/Kalyan0313/ExamPrep_AI.git
 cd ExamPrep_AI
 ```
 
----
+### Backend
 
-### 2. Backend Configuration & Startup
 ```bash
-# Navigate to backend
 cd backend
-
-# Install dependencies
 npm install
-
-# Create environment variable file
-cp .env.example .env   # Or create .env manually
 ```
 
-Configure your `backend/.env` file:
+Create a `.env` file (use `.env.example` as reference):
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/examprep_ai
-JWT_SECRET=your_super_secret_jwt_key_here
-GEMINI_API_KEY=your_google_gemini_api_key_here
+JWT_SECRET=something_long_and_random
+GEMINI_API_KEY=your_key_here
+CLIENT_URL=http://localhost:3000
 ```
 
-Start the backend server:
 ```bash
-# Development mode with Nodemon
 npm run dev
-
-# Production mode
-npm start
 ```
-The API server will run at `http://localhost:5000`.
 
----
+Backend runs at `http://localhost:5000`. You can hit `/api/health` to confirm it's up.
 
-### 3. Frontend Configuration & Startup
+### Frontend
+
 ```bash
-# Navigate to frontend (from root)
 cd ../frontend
-
-# Install dependencies
 npm install
-
-# Configure environment variables (.env.local)
-echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
-
-# Run Next.js development server
-npm run dev
 ```
-The application interface will be available at `http://localhost:3000`.
 
----
+Create a `.env.local` file:
 
-## 🔌 API Endpoint Summary
-
-| Category | Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :--- | :---: |
-| **Auth** | `POST` | `/api/auth/register` | Register new user account | ❌ |
-| **Auth** | `POST` | `/api/auth/login` | Authenticate user & return JWT | ❌ |
-| **Folders** | `GET` | `/api/folders` | Fetch user folder hierarchy | 🔒 |
-| **Folders** | `POST` | `/api/folders` | Create a new subject folder | 🔒 |
-| **Chapters**| `POST` | `/api/chapters` | Add chapter via text payload or file upload | 🔒 |
-| **Quiz** | `POST` | `/api/quiz/generate` | Generate AI quiz from chapter content | 🔒 |
-| **Quiz** | `POST` | `/api/quiz/:id/submit` | Submit quiz answers & compute score | 🔒 |
-| **Retry** | `POST` | `/api/quiz/:id/retry` | Generate targeted retry session for missed questions | 🔒 |
-| **Bookmarks**| `POST` | `/api/bookmarks` | Toggle bookmark status for a question | 🔒 |
-
----
-
-## 🧪 Quality & Type Safety
-
-The codebase strictly enforces TypeScript safety across state stores and client services.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
 
 ```bash
-# Run type-checking on frontend
-cd frontend
-npx tsc --noEmit
+npm run dev
+```
 
-# Run Next.js linter
-npm run lint
+Frontend runs at `http://localhost:3000`.
+
+---
+
+## Deploying
+
+Backend is on Render. Frontend is on Vercel (or any platform that runs Next.js).
+
+The only thing that trips people up: set `NEXT_PUBLIC_API_URL` in your Vercel environment variables to your Render URL, and include `/api` at the end — e.g. `https://examprep-ai-f5ux.onrender.com/api`.
+
+On the backend side, set `CLIENT_URL` to your frontend domain so CORS is scoped correctly.
+
+---
+
+## Project structure
+
+```
+ExamPrep_AI/
+├── frontend/
+│   ├── app/               # Next.js pages (login, register, dashboard, quiz runner, analytics)
+│   ├── components/        # UI components and workspace panels
+│   ├── store/             # Zustand stores (auth, folders, chapters, quiz)
+│   └── services/          # fetchApi wrapper and base URL utility
+│
+├── backend/
+│   ├── controllers/       # Route handlers for auth, folders, chapters, quiz, bookmarks
+│   ├── models/            # Mongoose schemas
+│   ├── routes/            # Express route definitions
+│   ├── services/          # Gemini AI service, OpenRouter fallback, document parsers
+│   └── middleware/        # JWT auth middleware, Multer file upload config
+│
+└── project-docs/          # PRD, SRS, DB schema, API reference, UI spec, AI prompt strategy
 ```
 
 ---
 
-## 📄 License
+## API overview
 
-Distributed under the MIT License. See `LICENSE` for more details.
+| Method | Endpoint | What it does |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Create account |
+| POST | `/api/auth/login` | Get JWT token |
+| GET | `/api/folders` | Fetch user's folder tree |
+| POST | `/api/folders` | Create a new folder |
+| POST | `/api/chapters` | Add chapter (text or file upload) |
+| POST | `/api/quizzes/generate` | Generate quiz from chapter content |
+| POST | `/api/quizzes/:id/submit` | Submit answers, get results |
+| POST | `/api/quizzes/:id/retry` | Generate retry session for wrong answers |
+| POST | `/api/bookmarks` | Bookmark a question |
+| GET | `/api/analytics` | Fetch performance stats |
+
+Full endpoint documentation in [`project-docs/04-API.md`](./project-docs/04-API.md).
+
+---
+
+## Auth flow
+
+JWT tokens are stored in `localStorage` and attached to every API request via `Authorization: Bearer <token>`. 
+
+- The dashboard is route-guarded — unauthenticated users get redirected to `/login`
+- Login and register pages redirect back to `/dashboard` if you're already logged in
+- Token expiry is 30 days
+
+---
+
+## A few things worth knowing
+
+**Render cold starts** — The free tier backend goes to sleep after 15 minutes of inactivity. First request after a sleep can take 30–50 seconds. Hit `/api/health` in the browser first if things seem slow.
+
+**Gemini quotas** — Free tier has daily limits. The AI gateway automatically falls back to OpenRouter models if Gemini returns a quota error.
+
+**File size** — Upload limit is 50MB. Scanned PDFs with image-heavy pages may take longer to parse.
+
+---
+
+## License
+
+MIT

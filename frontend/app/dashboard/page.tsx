@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FolderTree } from '../../components/workspace/FolderTree';
 import { CreateChapterModal } from '../../components/workspace/CreateChapterModal';
@@ -10,11 +10,11 @@ import { useAuthStore } from '../../store/authStore';
 import { RenderFolderIcon } from '../../components/ui/FolderIcon';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { ProfileModal } from '../../components/user/ProfileModal';
-import { Folder, FileText, Plus, BookOpen, Search, Clock, Trash2, ArrowRight, Home, LogOut, User as UserIcon, Flame, ChevronDown } from 'lucide-react';
+import { Plus, BookOpen, Search, Clock, Trash2, ArrowRight, Home, LogOut, User as UserIcon, Flame, ChevronDown } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, initAuth, logout } = useAuthStore();
+  const { user, isAuthenticated, isLoading, initAuth, logout } = useAuthStore();
   const { folders, activeFolderId, fetchFolders } = useFolderStore();
   const { chapters, fetchChapters, deleteChapter } = useChapterStore();
 
@@ -24,15 +24,43 @@ export default function DashboardPage() {
   const [deleteChapterId, setDeleteChapterId] = useState<string | null>(null);
   const [deleteChapterTitle, setDeleteChapterTitle] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
+  // Initialize auth state from localStorage on mount
   useEffect(() => {
     initAuth();
-    fetchFolders();
-  }, [initAuth, fetchFolders]);
+  }, []);
+
+  // Once auth state is resolved, redirect unauthenticated users to login
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Only fetch data when the user is confirmed authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchFolders();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchChapters(activeFolderId || undefined);
-  }, [activeFolderId, fetchChapters]);
+    if (isAuthenticated) {
+      fetchChapters(activeFolderId || undefined);
+    }
+  }, [activeFolderId, isAuthenticated]);
+
+  // Close user dropdown when clicking anywhere outside it
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const activeFolder = folders.find((f) => f._id === activeFolderId);
   const childFolders = folders.filter((f) => f.parentFolderId === (activeFolderId || null));
@@ -49,6 +77,20 @@ export default function DashboardPage() {
     logout();
     router.push('/login');
   };
+
+  // Show minimal loading skeleton while auth state is being resolved
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-[#0B0F17] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">Loading workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="flex h-screen bg-[#0B0F17] text-[#F8FAFC] overflow-hidden">
@@ -86,7 +128,7 @@ export default function DashboardPage() {
             </button>
 
             {/* User Profile Dropdown Button */}
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
                 className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-800 border border-slate-800 text-xs font-medium transition-colors"

@@ -298,7 +298,7 @@ export default function LandingPage() {
           <div>© 2026 ExamPrep AI. All rights reserved.</div>
 
           <div className="flex gap-6 font-medium">
-            <Link href="/dashboard" className="hover:text-white transition-colors">Workspace</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Workspace</Link>
             <Link href="/login" className="hover:text-white transition-colors">Login</Link>
             <Link href="/register" className="hover:text-white transition-colors">Register</Link>
           </div>
