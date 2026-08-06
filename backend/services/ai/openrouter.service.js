@@ -51,7 +51,8 @@ Return valid JSON with key "questions" containing an array of ${questionCount} i
 - question (string: real, factual, challenging competitive exam question)
 - options (array of 4 distinct plausible strings)
 - correctAnswer (number: 0, 1, 2, or 3)
-- explanation (string: detailed step-by-step reasoning)
+- explanation (string: factual, teacher-style reasoning. NEVER say "The text states", "According to the text", "The passage says", or reference the chapter/notes/passage in any way. Explain as a knowledgeable teacher from memory.)
+- explanationBengali (string: complete Bengali translation of the explanation in Bengali script/বাংলা)
 - conceptTag (string: specific historical/scientific concept)
 - difficulty ("easy" | "medium" | "hard")
 `;
@@ -142,7 +143,8 @@ Return valid JSON with key "questions" containing an array of items with:
 - question (string)
 - options (array of 4 strings)
 - correctAnswer (number: 0, 1, 2, or 3)
-- explanation (string)
+- explanation (string: factual, teacher-style reasoning. NEVER say "The text states" or reference the chapter/notes/passage.)
+- explanationBengali (string: complete Bengali translation of the explanation in Bengali script/বাংলা)
 - conceptTag (string)
 - difficulty ("easy" | "medium" | "hard")
 `;

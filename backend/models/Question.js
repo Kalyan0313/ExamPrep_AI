@@ -31,6 +31,10 @@ const questionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    explanationBengali: {
+      type: String,
+      default: '',
+    },
     conceptTag: {
       type: String,
       required: true,

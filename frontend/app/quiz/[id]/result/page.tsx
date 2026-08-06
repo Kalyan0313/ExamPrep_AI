@@ -23,6 +23,7 @@ interface QuestionReview {
   options: string[];
   correctAnswer: number;
   explanation: string;
+  explanationBengali?: string;
   conceptTag: string;
   userAnswer?: number | null;
   isCorrect?: boolean | null;
@@ -300,10 +301,19 @@ export default function QuizResultPage() {
                         })}
                       </div>
 
+                      {/* English Explanation */}
                       <div className="p-3 bg-obsidian-card border border-obsidian-border rounded-lg text-xs space-y-1">
-                        <div className="font-semibold text-obsidian-purple uppercase tracking-wider">AI Step-by-Step Explanation:</div>
+                        <div className="font-semibold text-obsidian-purple uppercase tracking-wider text-[10px] mb-1.5">🇬🇧 Explanation</div>
                         <p className="text-obsidian-text leading-relaxed">{q.explanation}</p>
                       </div>
+
+                      {/* Bengali Explanation */}
+                      {q.explanationBengali && (
+                        <div className="p-3 bg-indigo-600/5 border border-indigo-500/20 rounded-lg text-xs space-y-1">
+                          <div className="font-semibold text-indigo-400 uppercase tracking-wider text-[10px] mb-1.5">🇧🇩 বাংলায় ব্যাখ্যা</div>
+                          <p className="text-slate-300 leading-relaxed" style={{ fontFamily: 'inherit', lineHeight: '1.8' }}>{q.explanationBengali}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

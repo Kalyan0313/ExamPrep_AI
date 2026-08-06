@@ -50,6 +50,7 @@ const normalizeQuestionDoc = (q, quizId, chapterId) => {
     options: cleanOptions,
     correctAnswer: parseCorrectAnswerIndex(q),
     explanation: String(q.explanation || 'Refer to study notes for detailed reasoning.'),
+    explanationBengali: String(q.explanationBengali || ''),
     conceptTag: String(q.conceptTag || q.concept || 'General Concept'),
     difficulty: q.difficulty || 'medium',
     questionHash: String(q.questionHash || ''),
