@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { HeroSpinningEmblem } from '../components/ui/HeroSpinningEmblem';
+import { DemoModal } from '../components/ui/DemoModal';
 import {
   Brain,
   Sparkles,
@@ -252,40 +253,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo Video Modal */}
-      {isDemoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <Play size={16} className="text-indigo-400" />
-                <span>ExamPrep AI Platform Demo</span>
-              </div>
-              <button
-                onClick={() => setIsDemoModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="aspect-video bg-black rounded-xl overflow-hidden flex flex-col items-center justify-center text-center p-8 space-y-3 border border-slate-800">
-              <Brain size={48} className="text-indigo-400 animate-pulse" />
-              <div className="text-sm font-bold text-white">Interactive Workspace Demo Preview</div>
-              <p className="text-xs text-slate-400 max-w-md">
-                Experience PDF document upload, AI question setting, and adaptive weak concept retries in our live workspace.
-              </p>
-              <Link
-                href="/register"
-                onClick={() => setIsDemoModalOpen(false)}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-500"
-              >
-                Launch Workspace Now
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Demo Modal */}
+      {isDemoModalOpen && <DemoModal onClose={() => setIsDemoModalOpen(false)} />}
 
       {/* Footer */}
       <footer className="mt-auto border-t border-slate-800/80 bg-[#0F172A] py-8 px-6">
