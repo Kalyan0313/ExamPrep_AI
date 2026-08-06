@@ -191,7 +191,82 @@ Return valid JSON with key "questions" containing an array of items with:
   throw new Error('All OpenRouter retry models failed.');
 };
 
+/**
+ * Generate quick notes via OpenRouter API with fallbacks
+ */
+const generateQuickNotesOpenRouter = async ({ title, subject, chapterContent }) => {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey || apiKey.includes('your_')) {
+    throw new Error('OPENROUTER_API_KEY is not configured');
+  }
+
+  const promptText = `You are an expert educator preparing quick-revision one-liner notes for Indian competitive exam students.
+
+From the following chapter content, carefully extract all the important, need-to-know facts, definitions, dates, names, events, and key points that are critical for competitive exams. Do not skip any key pieces of information.
+Dynamically generate as many revision notes as needed to cover all the important points in the document.
+
+STRICT RULES:
+- Each note must be a single crisp sentence (max 25 words).
+- Must be factual, high-yield, and directly testable in exams (SSC, UPSC, Railways, Banking).
+- Cover all key sub-topics within the chapter content.
+- Do NOT say "The text states" or reference the chapter/passage. State facts directly.
+- The "bn" field must be the COMPLETE Bengali translation of "en", written in Bengali script (বাংলা). Not transliteration.
+
+Chapter: ${title}
+Subject: ${subject}
+
+Content:
+"""
+${chapterContent.substring(0, 15000)}
+"""
+
+Return a valid JSON object with key "notes" containing an array of objects, each with:
+- en (string: the one-liner fact in English)
+- bn (string: the same fact translated into Bengali script)`;
+
+  const modelsToTry = [
+    'google/gemini-2.5-flash-lite',
+    'qwen/qwen-2.5-72b-instruct:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+  ];
+
+  for (const modelName of modelsToTry) {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://examprep.ai',
+          'X-Title': 'ExamPrep AI',
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            { role: 'user', content: promptText },
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const messageContent = data.choices?.[0]?.message?.content || '';
+        const parsed = extractJsonFromText(messageContent);
+        if (parsed && Array.isArray(parsed.notes) && parsed.notes.length > 0) {
+          return parsed.notes;
+        }
+      }
+    } catch (err) {
+      console.warn(`OpenRouter quick notes model ${modelName} failed: ${err.message}`);
+    }
+  }
+
+  throw new Error('All OpenRouter quick notes models failed.');
+};
+
 module.exports = {
   generateQuestionsOpenRouter,
   generateAdaptiveRetryOpenRouter,
+  generateQuickNotesOpenRouter,
 };

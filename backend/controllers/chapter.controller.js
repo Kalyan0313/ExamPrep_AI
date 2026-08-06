@@ -2,7 +2,7 @@ const Chapter = require('../models/Chapter');
 const Quiz = require('../models/Quiz');
 const Question = require('../models/Question');
 const { parseUploadedDocument } = require('../services/parser.service');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateAIQuickNotes } = require('../services/ai/gateway.service');
 
 // @desc    Get chapters (optional filter by folderId)
 // @route   GET /api/chapters
@@ -165,51 +165,17 @@ const generateQuickNotes = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Chapter not found' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      return res.status(500).json({ success: false, message: 'AI service not configured' });
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: { responseMimeType: 'application/json' },
+    const { providerUsed, notes: rawNotes } = await generateAIQuickNotes({
+      title: chapter.title,
+      subject: chapter.subject,
+      chapterContent: chapter.content,
     });
 
-    const prompt = `You are an expert educator preparing quick-revision one-liner notes for Indian competitive exam students.
-
-From the following chapter content, carefully extract all the important, need-to-know facts, definitions, dates, names, events, and key points that are critical for competitive exams. Do not skip any key pieces of information.
-Dynamically generate as many revision notes as needed to cover all the important points in the document.
-
-STRICT RULES:
-- Each note must be a single crisp sentence (max 25 words).
-- Must be factual, high-yield, and directly testable in exams (SSC, UPSC, Railways, Banking).
-- Cover all key sub-topics within the chapter content.
-- Do NOT say "The text states" or reference the chapter/passage. State facts directly.
-- The "bn" field must be the COMPLETE Bengali translation of "en", written in Bengali script (বাংলা). Not transliteration.
-
-Chapter: ${chapter.title}
-Subject: ${chapter.subject}
-
-Content:
-"""
-${chapter.content.substring(0, 15000)}
-"""
-
-Return a valid JSON object with key "notes" containing an array of objects, each with:
-- en (string: the one-liner fact in English)
-- bn (string: the same fact translated into Bengali script)`;
-
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text() || '';
-    const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const parsed = JSON.parse(cleanJson);
-
-    if (!parsed.notes || !Array.isArray(parsed.notes) || parsed.notes.length === 0) {
-      return res.status(500).json({ success: false, message: 'AI did not return valid notes structure' });
+    if (!rawNotes || !Array.isArray(rawNotes) || rawNotes.length === 0) {
+      return res.status(500).json({ success: false, message: 'AI failed to generate quick notes' });
     }
 
-    const notes = parsed.notes.map(n => ({
+    const notes = rawNotes.map(n => ({
       en: String(n.en || ''),
       bn: String(n.bn || ''),
     })).filter(n => n.en && n.bn);
@@ -218,7 +184,7 @@ Return a valid JSON object with key "notes" containing an array of objects, each
     chapter.quickNotesGeneratedAt = new Date();
     await chapter.save();
 
-    res.status(200).json({ success: true, notes });
+    res.status(200).json({ success: true, providerUsed, notes });
   } catch (error) {
     console.error('Quick Notes Generation Error:', error);
     res.status(500).json({ success: false, message: error.message });

@@ -144,8 +144,75 @@ Return valid JSON with key "questions" containing an array of items with:
   }
 };
 
+/**
+ * Generate quick notes via Google Gemini API with robust model fallback
+ */
+const generateQuickNotesGemini = async ({ title, subject, chapterContent }) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const modelsToTry = [
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-2.5-flash',
+    'gemini-1.5-pro',
+  ];
+
+  const promptText = `You are an expert educator preparing quick-revision one-liner notes for Indian competitive exam students.
+
+From the following chapter content, carefully extract all the important, need-to-know facts, definitions, dates, names, events, and key points that are critical for competitive exams. Do not skip any key pieces of information.
+Dynamically generate as many revision notes as needed to cover all the important points in the document.
+
+STRICT RULES:
+- Each note must be a single crisp sentence (max 25 words).
+- Must be factual, high-yield, and directly testable in exams (SSC, UPSC, Railways, Banking).
+- Cover all key sub-topics within the chapter content.
+- Do NOT say "The text states" or reference the chapter/passage. State facts directly.
+- The "bn" field must be the COMPLETE Bengali translation of "en", written in Bengali script (বাংলা). Not transliteration.
+
+Chapter: ${title}
+Subject: ${subject}
+
+Content:
+"""
+${chapterContent.substring(0, 15000)}
+"""
+
+Return a valid JSON object with key "notes" containing an array of objects, each with:
+- en (string: the one-liner fact in English)
+- bn (string: the same fact translated into Bengali script)`;
+
+  let lastError = null;
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: { responseMimeType: 'application/json' },
+      });
+      const result = await model.generateContent(promptText);
+      const response = await result.response;
+      const responseText = response.text() || '';
+      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      if (parsed.notes && Array.isArray(parsed.notes)) {
+        return parsed.notes;
+      }
+    } catch (err) {
+      console.warn(`Gemini model ${modelName} failed for quick notes:`, err.message);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('All Gemini models failed to generate quick notes');
+};
+
 module.exports = {
   generateQuestionsGemini,
   generateAdaptiveRetryGemini,
+  generateQuickNotesGemini,
   SYSTEM_PROMPT,
 };
