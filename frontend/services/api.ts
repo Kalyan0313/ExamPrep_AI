@@ -1,4 +1,11 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export function getApiBaseUrl(): string {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url = `${url}/api`;
+  }
+  return url;
+}
 
 export async function fetchApi<T>(
   endpoint: string,
@@ -15,8 +22,11 @@ export async function fetchApi<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const baseUrl = getApiBaseUrl();
+  const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const response = await fetch(`${baseUrl}${formattedEndpoint}`, {
       ...options,
       headers,
     });

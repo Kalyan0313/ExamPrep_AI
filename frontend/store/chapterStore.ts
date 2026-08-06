@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { fetchApi } from '../services/api';
+import { fetchApi, getApiBaseUrl } from '../services/api';
 
 export interface ChapterItem {
   _id: string;
@@ -75,7 +75,7 @@ export const useChapterStore = create<ChapterState>((set, get) => ({
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/chapters`, {
+      const response = await fetch(`${getApiBaseUrl()}/chapters`, {
         method: 'POST',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
